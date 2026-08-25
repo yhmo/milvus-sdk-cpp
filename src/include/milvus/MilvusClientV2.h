@@ -18,6 +18,8 @@
 
 #include <functional>
 
+#include "ClientRequestContext.h"
+#include "ClientTelemetry.h"
 #include "MilvusClientV2Session.h"
 #include "Status.h"
 #include "milvus/Export.h"
@@ -218,6 +220,7 @@ class MILVUS_SDK_API MilvusClientV2 {
      * @brief Connect to Milvus server.
      *
      * @param [in] connect_param server address and port
+     * @retval StatusCode::CLIENT_BUSY another connection lifecycle change is in progress; the operation may be retried
      * @return Status operation successfully or not
      */
     virtual Status
@@ -226,6 +229,7 @@ class MILVUS_SDK_API MilvusClientV2 {
     /**
      * @brief Close connections between client and server.
      *
+     * @retval StatusCode::CLIENT_BUSY another connection lifecycle change is in progress; the operation may be retried
      * @return Status operation successfully or not
      */
     virtual Status
@@ -234,6 +238,7 @@ class MILVUS_SDK_API MilvusClientV2 {
     /**
      * @brief Change timeout value in milliseconds for each RPC call.
      *
+     * @retval StatusCode::CLIENT_BUSY another connection lifecycle change is in progress; the operation may be retried
      */
     virtual Status
     SetRpcDeadlineMs(uint64_t timeout_ms) = 0;
@@ -242,6 +247,7 @@ class MILVUS_SDK_API MilvusClientV2 {
      * @brief Reset retry rules for each RPC call.
      *
      *  @param [in] retry_param retry rules
+     * @retval StatusCode::CLIENT_BUSY another connection lifecycle change is in progress; the operation may be retried
      */
     virtual Status
     SetRetryParam(const RetryParam& retry_param) = 0;
@@ -656,6 +662,7 @@ class MILVUS_SDK_API MilvusClientV2 {
      * @brief Switch connection to another database.
      *
      * @param [in] db_name name of the database
+     * @retval StatusCode::CLIENT_BUSY another connection lifecycle change is in progress; the operation may be retried
      * @return Status operation successfully or not
      */
     virtual Status
@@ -1435,6 +1442,12 @@ class MILVUS_SDK_API MilvusClientV2 {
      */
     virtual Status
     Session(const std::string& cluster_id, MilvusClientV2SessionPtr& session) = 0;
+
+    /** Returns the telemetry manager for diagnostics and custom command handlers. */
+    virtual ClientTelemetryManagerPtr
+    GetTelemetry() const {
+        return nullptr;
+    }
 };
 
 using MilvusClientV2Ptr = std::shared_ptr<MilvusClientV2>;

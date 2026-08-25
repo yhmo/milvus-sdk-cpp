@@ -27,10 +27,13 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <utility>
 
 #include "common.pb.h"
 #include "milvus.grpc.pb.h"
 #include "milvus.pb.h"
+#include "milvus/ClientRequestContext.h"
+#include "milvus/ClientTelemetry.h"
 #include "milvus/Status.h"
 #include "milvus/types/ConnectParam.h"
 #include "schema.pb.h"
@@ -45,10 +48,15 @@ class MilvusConnection {
     struct GrpcContextOptions {
         /** timeout in milliseconds */
         uint64_t timeout{0};
+        /** Optional per-call request ID. Falls back to ClientRequestContext. */
+        std::string request_id;
 
         // constructors
         GrpcContextOptions() = default;
         explicit GrpcContextOptions(uint64_t timeout_) : timeout{timeout_} {
+        }
+        GrpcContextOptions(uint64_t timeout_, std::string request_id_)
+            : timeout{timeout_}, request_id{std::move(request_id_)} {
         }
     };
 
@@ -57,13 +65,17 @@ class MilvusConnection {
     virtual ~MilvusConnection();
 
     Status
-    Connect(const ConnectParam& param);
+    Connect(const ConnectParam& param, const std::string& runtime_telemetry_client_id = "",
+            ClientTelemetryManagerPtr reusable_telemetry = nullptr, const std::string& telemetry_logical_endpoint = "");
 
     ConnectParam&
     GetConnectParam();
 
+    ClientTelemetryManagerPtr
+    GetTelemetry() const;
+
     Status
-    Disconnect();
+    Disconnect(bool stop_telemetry = true);
 
     Status
     UseDatabase(const std::string& db_name);
@@ -503,10 +515,13 @@ class MilvusConnection {
                           const GrpcContextOptions& options);
 
  private:
-    std::mutex stub_mtx_;
+    mutable std::mutex stub_mtx_;
     std::shared_ptr<proto::milvus::MilvusService::Stub> stub_;
     std::shared_ptr<grpc::Channel> channel_;
     ConnectParam param_;
+    ClientTelemetryManagerPtr telemetry_;
+    std::string telemetry_client_id_;
+    std::string telemetry_logical_endpoint_;
 
     static Status
     StatusByProtoResponse(const proto::common::Status& status);
@@ -529,6 +544,7 @@ class MilvusConnection {
     grpcCall(const char* name,
              grpc::Status (proto::milvus::MilvusService::Stub::*func)(grpc::ClientContext*, const Request&, Response*),
              const Request& request, Response& response, const GrpcContextOptions& options) {
+        (void)name;
         std::shared_ptr<proto::milvus::MilvusService::Stub> stub;
         {
             std::lock_guard<std::mutex> lock(stub_mtx_);
@@ -539,6 +555,11 @@ class MilvusConnection {
         }
 
         ::grpc::ClientContext context;
+        const std::string& contextual_request_id = ClientRequestContext::Get();
+        const std::string request_id = options.request_id.empty() ? contextual_request_id : options.request_id;
+        if (ClientRequestContext::IsValid(request_id)) {
+            context.AddMetadata("client_request_id", request_id);
+        }
         if (options.timeout > 0) {
             auto deadline = std::chrono::system_clock::now() + std::chrono::milliseconds{options.timeout};
             context.set_deadline(deadline);
@@ -562,7 +583,8 @@ class MilvusConnection {
         // Some milvus error codes can be retried:
         //   response.status().error_code() == io.milvus.grpc.ErrorCode.RateLimit
         //   or response.status()code() == 8 can be retried
-        return StatusByProtoResponse(response);
+        auto status = StatusByProtoResponse(response);
+        return status;
     }
 };
 
