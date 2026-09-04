@@ -1772,6 +1772,17 @@ Status
 MilvusClientV2Impl::insert(const InsertRequest& request, InsertResponse& response, bool allow_retry) {
     const auto endpoint = connection_.CurrentEndpoint();
     const auto database_name = connection_.CurrentDbName(request.DatabaseName());
+
+    // Short-circuit empty data like pymilvus: no rows to insert, do not issue the RPC.
+    if (request.ColumnsData().empty() && request.RowsData().empty()) {
+        if (request.CollectionName().empty()) {
+            return {StatusCode::INVALID_ARGUMENT, "Collection name cannot be empty!"};
+        }
+        DmlResults results;
+        response.SetResults(std::move(results));
+        return Status::OK();
+    }
+
     CollectionDescPtr collection_desc;
     std::vector<proto::schema::FieldData> rpc_fields;
     auto validate = [this, &endpoint, &database_name, &request, &collection_desc, &rpc_fields]() {
@@ -1892,6 +1903,19 @@ Status
 MilvusClientV2Impl::upsert(const UpsertRequest& request, UpsertResponse& response, bool allow_retry) {
     const auto endpoint = connection_.CurrentEndpoint();
     const auto database_name = connection_.CurrentDbName(request.DatabaseName());
+
+    // Short-circuit empty data like pymilvus: no rows to upsert, do not issue the RPC.
+    // Keep partial-update field operations flowing to the server for validation even
+    // when the request carries no rows (field_ops is a C++-specific input).
+    if (request.ColumnsData().empty() && request.RowsData().empty() && request.FieldOps().empty()) {
+        if (request.CollectionName().empty()) {
+            return {StatusCode::INVALID_ARGUMENT, "Collection name cannot be empty!"};
+        }
+        DmlResults results;
+        response.SetResults(std::move(results));
+        return Status::OK();
+    }
+
     std::vector<proto::schema::FieldData> rpc_fields;
     CollectionDescPtr collection_desc;
     auto validate = [this, &endpoint, &database_name, &request, &collection_desc, &rpc_fields]() {
@@ -2354,6 +2378,16 @@ MilvusClientV2Impl::get(const GetRequest& request, GetResponse& response, const 
 Status
 MilvusClientV2Impl::getWithoutTelemetry(const GetRequest& request, GetResponse& response,
                                         const std::string& cluster_id) {
+    // Short-circuit empty ids like pymilvus: no rows to fetch, do not issue the RPC.
+    if (request.IDs().GetRowCount() == 0) {
+        if (request.CollectionName().empty()) {
+            return {StatusCode::INVALID_ARGUMENT, "Collection name cannot be empty!"};
+        }
+        response.SetResults(QueryResults{});
+        response.SetSessionTs(0);
+        return Status::OK();
+    }
+
     const auto endpoint = connection_.CurrentEndpoint();
     const auto database_name = connection_.CurrentDbName(request.DatabaseName());
     CollectionDescPtr collection_desc;

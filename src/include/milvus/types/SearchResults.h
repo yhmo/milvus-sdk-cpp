@@ -147,6 +147,15 @@ struct MILVUS_SDK_API SingleResult {
     SingleResult&
     WithHighlightResults(std::vector<HighlightResults>&& highlight_results);
 
+    /**
+     * @brief Keep only the rows whose indices are in `keep_indices`, dropping the rest.
+     * This is used by the client-side page filter of the search iterator to prune
+     * hits fetched from the server. The order of the kept rows follows `keep_indices`.
+     * @return Status::OK on success, otherwise an INVALID_ARGUMENT status.
+     */
+    Status
+    FilterRows(const std::vector<uint64_t>& keep_indices);
+
  private:
     void
     verify() const;
