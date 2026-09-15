@@ -26,11 +26,16 @@ namespace milvus {
 template <typename T>
 class DBRequestBase {
  protected:
+    /**
+     * @brief Constructor
+     * @return the DB request base.
+     */
     DBRequestBase() = default;
 
  public:
     /**
      * @brief Get the target db name
+     * @return the database name.
      */
     const std::string&
     DatabaseName() const {
@@ -39,6 +44,7 @@ class DBRequestBase {
 
     /**
      * @brief Set target db name, use default database if it is empty.
+     * @param [in] db_name the DB name.
      */
     void
     SetDatabaseName(const std::string& db_name) {
@@ -47,6 +53,7 @@ class DBRequestBase {
 
     /**
      * @brief Set target db name, use default database if it is empty.
+     * @param [in] db_name the DB name.
      */
     T&
     WithDatabaseName(const std::string& db_name) {

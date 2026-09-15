@@ -37,54 +37,63 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
  public:
     /**
      * @brief Get the target db name.
+     * @return the database name.
      */
     const std::string&
     DatabaseName() const;
 
     /**
      * @brief Set target db name, default is empty, means use the db name of MilvusClient.
+     * @param [in] db_name the DB name.
      */
     Status
     SetDatabaseName(const std::string& db_name);
 
     /**
      * @brief Get name of the target collection.
+     * @return the collection name.
      */
     const std::string&
     CollectionName() const;
 
     /**
      * @brief Set name of this collection, cannot be empty.
+     * @param [in] collection_name the collection name.
      */
     Status
     SetCollectionName(std::string collection_name);
 
     /**
      * @brief Get partition names.
+     * @return the partition names.
      */
     const std::set<std::string>&
     PartitionNames() const;
 
     /**
      * @brief Specify partition name to control search scope, the name cannot be empty.
+     * @param [in] partition_name the partition name.
      */
     Status
     AddPartitionName(std::string partition_name);
 
     /**
      * @brief Get output field names.
+     * @return the output fields.
      */
     const std::set<std::string>&
     OutputFields() const;
 
     /**
      * @brief Specify output field names to return field data, the name cannot be empty.
+     * @param [in] field_name the field name.
      */
     Status
     AddOutputField(std::string field_name);
 
     /**
      * @brief Get offset value.
+     * @return the offset.
      */
     int64_t
     Offset() const;
@@ -92,12 +101,14 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Set offset value.
      * Note: this value is stored in the ExtraParams.
+     * @param [in] offset the offset.
      */
     Status
     SetOffset(int64_t offset);
 
     /**
      * @brief Get the decimal place of the returned results.
+     * @return the round decimal.
      */
     int
     RoundDecimal() const;
@@ -105,24 +116,28 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Specifies the decimal place of the returned results.
      * Note: this value is stored in the ExtraParams.
+     * @param [in] round_decimal the round decimal.
      */
     Status
     SetRoundDecimal(int round_decimal);
 
     /**
      * @brief Get consistency level.
+     * @return the get consistency level.
      */
     ConsistencyLevel
     GetConsistencyLevel() const;
 
     /**
      * @brief Set consistency level.
+     * @param [in] level the level.
      */
     Status
     SetConsistencyLevel(const ConsistencyLevel& level);
 
     /**
      * @brief Get ignore growing segments.
+     * @return the ignore growing.
      */
     bool
     IgnoreGrowing() const;
@@ -130,12 +145,14 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Set ignore growing segments.
      * Note: this value is stored in the ExtraParams.
+     * @param [in] ignore_growing the ignore growing.
      */
     Status
     SetIgnoreGrowing(bool ignore_growing);
 
     /**
      * @brief Get group by field name.
+     * @return the group by field.
      */
     std::string
     GroupByField() const;
@@ -143,12 +160,14 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Set group by field name.
      * Note: this value is stored in the ExtraParams.
+     * @param [in] field_name the field name.
      */
     Status
     SetGroupByField(const std::string& field_name);
 
     /**
      * @brief Get size of group by.
+     * @return the group size.
      */
     uint64_t
     GroupSize() const;
@@ -156,12 +175,14 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Set size of group by.
      * Note: this value is stored in the ExtraParams.
+     * @param [in] group_size the group size.
      */
     Status
     SetGroupSize(uint64_t group_size);
 
     /**
      * @brief Get the flag whether to strict group size.
+     * @return the strict group size.
      */
     uint64_t
     StrictGroupSize() const;
@@ -169,6 +190,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Set the flag whether to strict group size.
      * Note: this value is stored in the ExtraParams.
+     * @param [in] strict_group_size the strict group size.
      */
     Status
     SetStrictGroupSize(bool strict_group_size);
@@ -178,6 +200,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Get filter expression.
      * @deprecated replaced by Filter()
+     * @return the expression.
      */
     const std::string&
     Expression() const;
@@ -185,6 +208,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Set filter expression.
      * @deprecated replaced by SetFilter()
+     * @param [in] expression the expression.
      */
     Status
     SetExpression(std::string expression);
@@ -192,6 +216,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Specify search limit, AKA topk.
      * @deprecated replaced by SetLimit()
+     * @param [in] topk the topk.
      */
     Status
     SetTopK(int64_t topk);
@@ -199,6 +224,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Get Top K.
      * @deprecated replaced by Limit()
+     * @return the top k.
      */
     int64_t
     TopK() const;
@@ -206,6 +232,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Get nprobe.
      * @deprecated replaced by ExtraParams()
+     * @return the nprobe.
      */
     int64_t
     Nprobe() const;
@@ -213,6 +240,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Set nprobe.
      * @deprecated replaced by AddExtraParam()
+     * @param [in] nlist the nlist.
      */
     Status
     SetNprobe(int64_t nlist);
@@ -220,6 +248,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Add a binary vector to search.
      * @deprecated replaced by AddBinaryVector
+     * @param [in] field_name the field name.
      */
     Status
     AddTargetVector(std::string field_name, const std::string& vector);
@@ -227,6 +256,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Add a binary vector to search with uint8_t vectors.
      * @deprecated replaced by AddBinaryVector
+     * @param [in] field_name the field name.
      */
     Status
     AddTargetVector(std::string field_name, const std::vector<uint8_t>& vector);
@@ -234,6 +264,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Add a binary vector to search.
      * @deprecated replaced by AddBinaryVector
+     * @param [in] field_name the field name.
      */
     Status
     AddTargetVector(std::string field_name, std::string&& vector);
@@ -241,6 +272,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Add a float vector to search.
      * @deprecated replaced by AddFloatVector
+     * @param [in] field_name the field name.
      */
     Status
     AddTargetVector(std::string field_name, const FloatVecFieldData::ElementT& vector);
@@ -248,6 +280,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Add a float vector to search.
      * @deprecated replaced by AddFloatVector
+     * @param [in] field_name the field name.
      */
     Status
     AddTargetVector(std::string field_name, FloatVecFieldData::ElementT&& vector);
@@ -255,6 +288,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Get travel timestamp.
      * @deprecated Deprecated in 2.4, replaced by ConsistencyLevel
+     * @return the travel timestamp.
      */
     uint64_t
     TravelTimestamp() const;
@@ -264,6 +298,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
      * time.
      * Default value is 0, server executes search on a full data view.
      * @deprecated Deprecated in 2.4, replaced by ConsistencyLevel
+     * @param [in] timestamp the timestamp.
      */
     Status
     SetTravelTimestamp(uint64_t timestamp);
@@ -271,6 +306,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
     /**
      * @brief Get guarantee timestamp.
      * @deprecated Deprecated in 2.4, replaced by ConsistencyLevel, this value is not used anymore.
+     * @return the guarantee timestamp.
      */
     uint64_t
     GuaranteeTimestamp() const;
@@ -287,6 +323,7 @@ class MILVUS_SDK_API SearchArguments : public SearchRequestBase {
      *
      * Default value is 1, server executes search immediately.
      * @deprecated Deprecated in 2.4, replaced by ConsistencyLevel.
+     * @param [in] timestamp the timestamp.
      */
     Status
     SetGuaranteeTimestamp(uint64_t timestamp);
